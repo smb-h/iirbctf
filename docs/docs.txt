@@ -1,0 +1,17 @@
+# Datasets:
+# MIT-States:
+paper: http://people.csail.mit.edu/lim/paper/state_cvpr15.pdf
+dataset: https://web.mit.edu/phillipi/Public/states_and_transformations/index.html
+codes: https://paperswithcode.com/dataset/mit-states
+
+# CSS:
+paper: https://arxiv.org/pdf/1612.06890.pdf
+dataset: https://cs.stanford.edu/people/jcjohns/clevr/
+codes: https://paperswithcode.com/paper/clevr-a-diagnostic-dataset-for-compositional
+
+# Fashion-200k
+paper: https://arxiv.org/pdf/1708.01311.pdf 
+dataset:
+https://drive.google.com/drive/folders/0B4Eo9mft9jwoamlYWFZBSHFzV3c?resourcekey=0-2s7M82p8Bn7riqxWVlgctw
+https://www.kaggle.com/datasets/mayukh18/fashion200k-dataset
+codes: https://paperswithcode.com/paper/automatic-spatially-aware-fashion-concept
