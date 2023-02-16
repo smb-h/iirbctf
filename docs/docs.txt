@@ -18,4 +18,4 @@ codes: https://paperswithcode.com/paper/automatic-spatially-aware-fashion-concep
 
 
 Issues:
-resources, net, object detection in mit states,
+resources, net, object detection errors in mit states,
