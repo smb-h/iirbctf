@@ -123,7 +123,7 @@ tifffile==2023.2.28
 tinycss2==1.2.1
 tokenize-rt==5.0.0
 tomli==2.0.1
-torch==1.13.0
+torch==1.13.1
 torchaudio==0.13.0
 torchsummary==1.5.1
 torchtext==0.14.1
