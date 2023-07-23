@@ -17,6 +17,5 @@ https://www.kaggle.com/datasets/mayukh18/fashion200k-dataset
 codes: https://paperswithcode.com/paper/automatic-spatially-aware-fashion-concept
 
 
-Issues:
-resources, net, object detection errors in mit states, 
-low acc in GRU, 
+# ===========================================================
+
