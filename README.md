@@ -22,7 +22,7 @@ We propose an autoencoder based model, to learn the composition of image and tex
 for retrieving images. We adopt a deep metric learning approach and learn a metric that pushes composition
 of source image and text query closer to the target images. We also used a rotational symmetry constraint
 on the optimization problem. 
-![Method](static/images/model_en.jpg)
+![Method](static/images/model_en.png)
 
 ## Results
 Our approach is able to outperform the state-of-the-art method TIRG and ComposeAE on a benchmark dataset, namely: MIT-States. 
