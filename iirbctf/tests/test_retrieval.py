@@ -14,7 +14,6 @@
 # ==============================================================================
 
 """Evaluates the retrieval model."""
-import random
 from collections import OrderedDict
 
 import numpy as np
@@ -139,7 +138,7 @@ def test(opt, model, testset):
     model.eval()
     test_queries = testset.get_test_queries()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     all_imgs = []
     all_captions = []

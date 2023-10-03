@@ -21,7 +21,6 @@ https://github.com/lugiavn/generalization-dml/blob/master/nams.py
 
 import numpy as np
 import torch
-import torchvision
 
 
 def pairwise_distances(x, y=None):
