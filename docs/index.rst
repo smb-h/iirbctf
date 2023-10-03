@@ -1,9 +1,9 @@
-.. gscmr4cqbir documentation master file, created by
+.. iirbctf documentation master file, created by
    sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-gscmr4cqbir documentation!
+iirbctf documentation!
 ==============================================
 
 Contents:
