@@ -16,6 +16,29 @@ https://drive.google.com/drive/folders/0B4Eo9mft9jwoamlYWFZBSHFzV3c?resourcekey=
 https://www.kaggle.com/datasets/mayukh18/fashion200k-dataset
 codes: https://paperswithcode.com/paper/automatic-spatially-aware-fashion-concept
 
+=================================================
 
-# ===========================================================
+# Train
+# mitstates_original_tirg
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_original --log_dir ./logs/mitstates/
+# mitstates_tirg_bert
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_bert --log_dir ./logs/mitstates/ --use_bert True
+# mitstates_tirg_complete_text_query
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_complete_text_query --log_dir ./logs/mitstates/ --use_complete_text_query True 
+# mitstates_tirg_bert_attention
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_bert_attention --log_dir ./logs/mitstates/ --use_bert True
+# mitstates_composeae_bert
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=composeAE --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=mitstates_composeae_bert --log_dir ./logs/mitstates/
+# mitstates_composeae_bert_attention
+python -W ignore  main.py --dataset=mitstates --dataset_path=./data/mitstates/  --model=composeAE --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=mitstates_composeae_bert_attention --log_dir ./logs/mitstates
 
+# Logs
+tensorboard --logdir ./logs/mitstates/ --port 8899
+
+# Test
+python -W ignore main.py --dataset=mitstates --dataset_path=./data/mitstates/ --model=tirg --comment=mitstates_tirg_test --log_dir ./logs/mitstates/ --test_only=True --model_checkpoint=./logs/mitstates/Aug28_16-42-37_dev3mitstates_tirg_original/latest_checkpoint.pth
+
+=================================================
+
+# TODO:
+Attention
