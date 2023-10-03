@@ -7,7 +7,7 @@ In information retrieval, the user seeks information from a retrieval system by 
 
 ## Teaser Figure 
 
-<img align="left" src="../static/sample.png" width="400">
+<img align="left" src="static/images/sample.png" width="400">
 
 Advanced information retrieval systems should enable the users in expressing the concept in their mind by allowing a multi-modal query.
 
@@ -22,7 +22,7 @@ We propose an autoencoder based model, to learn the composition of image and tex
 for retrieving images. We adopt a deep metric learning approach and learn a metric that pushes composition
 of source image and text query closer to the target images. We also used a rotational symmetry constraint
 on the optimization problem. 
-![Method](model_en.jpg)
+![Method](static/images/model_en.jpg)
 
 ## Results
 Our approach is able to outperform the state-of-the-art method TIRG and ComposeAE on a benchmark dataset, namely: MIT-States. 
