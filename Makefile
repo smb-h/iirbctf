@@ -1,14 +1,11 @@
-.PHONY: clean data lint format requirements sync_data_down sync_data_up
-
 #################################################################################
 # GLOBALS                                                                       #
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-PROJECT_NAME = gscmr4cqbir
+PROJECT_NAME = iirbctf
 PYTHON_VERSION = 3.10
 PYTHON_INTERPRETER = python
-
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -16,6 +13,7 @@ PYTHON_INTERPRETER = python
 
 
 ## Install Python Dependencies
+.PHONY: requirements
 requirements:
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
@@ -24,24 +22,28 @@ requirements:
 
 
 ## Delete all compiled Python files
+.PHONY: clean
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
 ## Lint using flake8 and black (use `make format` to do formatting)
+.PHONY: lint
 lint:
-	flake8 gscmr4cqbir
-	black --check --config pyproject.toml gscmr4cqbir
+	flake8 iirbctf
+	black --check --config pyproject.toml iirbctf
 
 
 ## Format source code with black
+.PHONY: format
 format:
-	black --config pyproject.toml gscmr4cqbir
+	black --config pyproject.toml iirbctf
 
 
 
 
 ## Set up python interpreter environment
+.PHONY: create_environment
 create_environment:
 	@bash -c "if [ ! -z `which virtualenvwrapper.sh` ]; then source `which virtualenvwrapper.sh`; mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER); else mkvirtualenv.bat $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER); fi"
 	@echo ">>> New virtualenv created. Activate with:\nworkon $(PROJECT_NAME)"
@@ -54,8 +56,9 @@ create_environment:
 #################################################################################
 
 ## Make Dataset
+.PHONY: data
 data: requirements
-	$(PYTHON_INTERPRETER) gscmr4cqbir/data/make_dataset.py
+	$(PYTHON_INTERPRETER) iirbctf/data/make_dataset.py
 
 #################################################################################
 # Self Documenting Commands                                                     #
