@@ -16,7 +16,6 @@
 """Models for Text and Image Composition."""
 
 import numpy as np
-import text_model
 import torch
 import torch.nn.functional as F
 import torch_functions
@@ -24,6 +23,8 @@ import torchvision
 from clip_client import Client as BertClient
 from torch.autograd import Variable
 from transformers import ViTFeatureExtractor, ViTModel
+
+import .text_model
 
 bc = BertClient("grpc://0.0.0.0:51000")
 
