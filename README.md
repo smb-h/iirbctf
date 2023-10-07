@@ -18,7 +18,7 @@ Specifically, the query text prompts some modification in the query image and th
 The figure shows a potential application scenario of this task.
 In this figure a user of an E-Commerce platform is interested in buying a dress, which should look similar to her friend’s dress, but the dress should has striped design and is more covered on the neck. In this case, we would like the algorithm to retrieve some dresses with desired modifications in the query dress.
 
-## ComposeAE Architecture
+## Model Architecture
 
 We propose an autoencoder based model, to learn the composition of image and text query
 for retrieving images. We adopt a deep metric learning approach and learn a metric that pushes composition
@@ -37,7 +37,9 @@ Our approach is able to outperform the state-of-the-art method TIRG and ComposeA
 
 -   Packages can be found in [requirements.txt](requirements.txt)
 
-## Description of the Code [(From ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md)
+
+<!-- ## Description of the Code [(From ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md) -->
+## Description of the Code
 
 The code is based on ComposeAE code.
 Several significant changes have been made.
