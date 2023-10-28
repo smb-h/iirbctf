@@ -122,11 +122,11 @@ If our code has been a big help in your research, show us some love by citing it
 
 ```
 @InProceedings{,
-    author    = {},
-    title     = {},
+    author    = {Hosseini},
+    title     = {Interactive Image Retrieval Enhanced by Content and Textual Feedback},
     booktitle = {},
-    month     = {},
-    year      = {},
+    month     = {October},
+    year      = {2023},
     pages     = {}
 }
 ```
