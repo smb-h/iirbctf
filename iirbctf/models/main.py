@@ -26,6 +26,7 @@ import time
 from copy import deepcopy
 from datetime import datetime
 
+import data.datasets as datasets
 import numpy as np
 import torch
 import torch.utils.data
@@ -34,8 +35,7 @@ from tensorboardX import SummaryWriter
 from torch.autograd import Variable
 from tqdm import tqdm as tqdm
 
-import ..data.datasets as datasets
-import ..tests.test_retrieval as test_retrieval
+import iirbctf.tests.test_retrieval as test_retrieval
 import .img_text_composition_models
 
 torch.set_num_threads(3)

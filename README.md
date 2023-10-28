@@ -30,7 +30,9 @@ Our approach is able to outperform the state-of-the-art method TIRG and ComposeA
 
 -   Packages can be found in [requirements.txt](requirements.txt)
 
-## Description of the Code [(From ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md)
+<!-- ## Description of the Code [(From ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md) -->
+
+## Description of the Code
 
 The code is based on ComposeAE code.
 Several significant changes have been made.

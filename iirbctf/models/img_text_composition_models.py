@@ -24,7 +24,7 @@ from clip_client import Client as BertClient
 from torch.autograd import Variable
 from transformers import ViTFeatureExtractor, ViTModel
 
-import .text_model
+import .text_model import TextLSTMModel
 
 bc = BertClient("grpc://0.0.0.0:51000")
 
@@ -308,7 +308,7 @@ class ImgEncoderTextEncoderBase(ImgTextCompositionBase):
         self.img_model = img_model
 
         # text model
-        self.text_model = text_model.TextLSTMModel(
+        self.text_model = TextLSTMModel(
             texts_to_build_vocab=text_query,
             word_embed_dim=text_embed_dim,
             lstm_hidden_dim=text_embed_dim,
