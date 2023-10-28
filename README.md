@@ -19,45 +19,41 @@ Here's a quick example to paint the picture. Say you're shopping online and want
 We've got a nifty model, powered by autoencoders and transformers, to make sense of text and images for your search. It's all about learning from the good stuff and using it to get you the perfect matches. We even throw in a sprinkle of math to keep things in check.
 ![How It Works](static/images/model_en.png)
 
-## Results
+## Check Out the Results
 
-Our approach is able to outperform the state-of-the-art method TIRG and ComposeAE on a benchmark dataset, namely: MIT-States.
+Our approach is the champ here, beating the state-of-the-art method TIRG and ComposeAE on the MIT-States benchmark dataset.
 
-<!-- Some qualitative retrieval results are shown below: -->
+<!-- Take a peek at some snazzy retrieval results below: -->
 <!-- ![Qual](FIQ_Retrieval.jpg) -->
 
-## Requirements and Installation
+## What You Need and How to Set It Up
 
--   Packages can be found in [requirements.txt](requirements.txt)
+-   You'll find all the packages you need in [requirements.txt](requirements.txt).
 
-<!-- ## Description of the Code [(From ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md) -->
+## About the Code [(Inspired by ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md)
 
-## Description of the Code
+We built our code based on ComposeAE's work, but we've spiced it up with some serious upgrades.
 
-The code is based on ComposeAE code.
-Several significant changes have been made.
+-   `main.py`: The main event – run this script for training and testing.
+-   `datasets.py`: Gets the goods, like loading images and whipping up training retrieval queries.
+-   `text_model.py`: A brainy LSTM model for text features.
+-   `img_text_composition_models.py`: Fancy models for mixing up images and text.
+-   `torch_function.py`: Holds our secret sauce – the soft triplet loss function and feature normalization magic.
+-   `test_retrieval.py`: This one's all about retrieval tests and calculating recall performance.
 
--   `main.py`: driver script to run training/testing
--   `datasets.py`: Dataset classes for loading images & generate training retrieval queries
--   `text_model.py`: LSTM model to extract text features
--   `img_text_composition_models.py`: various image text compostion models
--   `torch_function.py`: contains soft triplet loss function and feature normalization function
--   `test_retrieval.py`: functions to perform retrieval test and compute recall performance
+## Time to Run Some Experiments
 
-## Running the experiments
+### Grab the Datasets
 
-### Download the datasets
+#### MITStates Dataset
 
-#### MITStates dataset
-
-Download the dataset via this [link](http://web.mit.edu/phillipi/Public/states_and_transformations/index.html) and save it in the `data` folder. Kindly take care that the dataset should have these files:
+Get your hands on the MITStates dataset right [here](http://web.mit.edu/phillipi/Public/states_and_transformations/index.html). Save it in the `data` folder. Just make sure it's got these files:
 
 `data/processed/mitstates/images/<adj noun>/*.jpg`
 
-#### Fashion200k dataset
+#### Fashion200k Dataset
 
-Download the dataset via this [link](https://github.com/xthan/fashion-200k) and save it in the `data` folder.
-To ensure fair comparison, we employ the same test queries as TIRG. They can be downloaded from [here](https://storage.googleapis.com/image_retrieval_css/test_queries.txt). Kindly take care that the dataset should have these files:
+First up, grab the Fashion200k dataset from [this spot](https://github.com/xthan/fashion-200k), and toss it into your trusty `data` folder. To keep things on the level, we're using the same test queries as TIRG. You can nab those queries from [here](https://storage.googleapis.com/image_retrieval_css/test_queries.txt). Just make sure your dataset has these files:
 
 ```
 data/processed/fashion200k/labels/*.txt
@@ -65,66 +61,64 @@ data/processed/fashion200k/women/<category>/<caption>/<id>/*.jpeg
 data/processed/fashion200k/test_queries.txt`
 ```
 
-#### FashionIQ dataset
+#### FashionIQ Dataset
 
-Download the dataset via this [link](https://github.com/XiaoxiaoGuo/fashion-iq) and save it in the `data` folder.
-The dataset consists of three non-overlapping subsets, namely `dress`, `top-tee` and `shirt`.
-We join the two annotations with the text ` and it` to get a description similar to a normal sentence a user might ask on an E-Com platform.
-Furthermore, we combine the train sets of all three categories to form a bigger training set and train a single model on it.
-Analogously, we also combine the validation sets to form a single validation set.
+Now, for the FashionIQ dataset, head over to [this link](https://github.com/XiaoxiaoGuo/fashion-iq), and stash it in your `data` folder. This one's a bit of a mix, with three separate subsets: `dress`, `top-tee`, and `shirt`. We're taking those two annotations and giving them a little text twist, combining them to make it look more like something a user might ask on an e-commerce platform.
 
-## Running the Code
+What's more, we're bringing all three categories together for a beefed-up training set and training a single model on it. We're doing the same with the validation sets to keep things neat and tidy.
 
-For training and testing new models, pass the appropriate arguments.
+## Running the Show
 
-For instance, for training original TIRG model on MITStates dataset run the following command:
+To train and test your models, just use the right commands. Here are some examples to get you started:
 
-```
-python -W ignore  main.py --dataset=mitstates --dataset_path=../data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_original --log_dir ../logs/mitstates/
-```
+-   **Training the Original TIRG Model on MITStates Dataset:**
 
-For training TIRG with BERT model on MITStates dataset run the following command:
+    ```bash
+    python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_original --log_dir ../logs/mitstates/
 
-```
-python -W ignore  main.py --dataset=mitstates --dataset_path=../data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_bert --log_dir ../logs/mitstates/ --use_bert True
-```
+    ```
 
-For training TIRG with complete text query on MITStates dataset run the following command:
+-   **Training TIRG with BERT on MITStates Dataset:**
 
-```
-python -W ignore  main.py --dataset=mitstates --dataset_path=../data/mitstates/  --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_complete_text_query --log_dir ../logs/mitstates/ --use_complete_text_query True
-```
+    ```bash
+    python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_bert --log_dir ../logs/mitstates/ --use_bert True
+    ```
 
-For training ComposeAE model on Fashion200k dataset run the following command:
+-   **Training TIRG with Complete Text Query on MITStates Dataset:**
 
-```
-python -W ignore  main.py --dataset=fashion200k --dataset_path=../data/fashion200k/  --model=composeAE --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=fashion200k_composeAE --log_dir ../logs/fashion200k/
-```
+    ```bash
+    python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_complete_text_query --log_dir ../logs/mitstates/ --use_complete_text_query True
+    ```
 
-For training RealSpaceConcatAE (ComposeAE model but with Concatenation in Real Space) on FashionIQ dataset run the following command:
+-   **Training the ComposeAE Model on Fashion200k Dataset:**
 
-```
-python -W ignore  main.py --dataset=fashionIQ --dataset_path=../data/fashionIQ/  --model=RealSpaceConcatAE --loss=batch_based_classification --learning_rate_decay_frequency=8000 --num_iters=100000 --use_bert True --use_complete_text_query True --comment=fashionIQ_RealSpaceConcatAE --log_dir ../logs/fashionIQ/
-```
+    ```bash
+    python -W ignore main.py --dataset=fashion200k --dataset_path=../data/fashion200k/ --model=composeAE --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=fashion200k_composeAE --log_dir ../logs/fashion200k/
+    ```
 
-## Notes:
+-   **Training the RealSpaceConcatAE (ComposeAE Model with Concatenation in Real Space) on FashionIQ Dataset:**
+    ```bash
+    python -W ignore main.py --dataset=fashionIQ --dataset_path=../data/fashionIQ/ --model=RealSpaceConcatAE --loss=batch_based_classification --learning_rate_decay_frequency=8000 --num_iters=100000 --use_bert True --use_complete_text_query True --comment=fashionIQ_RealSpaceConcatAE --log_dir ../logs/fashionIQ/
+    ```
 
-### Running the BERT model
+This version simplifies the instructions and makes it more approachable for users.
 
-We use pretrained BERT model for encoding the text query.
-Concretely, we employ BERT-as-service and use Uncased BERT-Base which outputs a 512-dimensional feature vector for a text query.
-Detailed instructions on how to use it, can be found [here](https://github.com/jina-ai/clip-as-service).
-It is important to note that before running the training of the models, BERT-as-service should already be running in the background.
+## Important Stuff to Know
 
-### Monitoring Performance via tensorboard
+### Using the BERT Model
 
-Run the following command for monitoring loss and retrieval performance of the models:
+We've got a snazzy BERT model that helps encode text queries. We use BERT-as-service with Uncased BERT-Base, and it dishes out a 512-dimensional feature vector for text queries. To get the nitty-gritty on how to use it, check out the instructions [here](https://github.com/jina-ai/clip-as-service). Just a heads-up, make sure you've got BERT-as-service up and running in the background before you dive into training your models.
 
-`tensorboard --logdir ./reports/fashion200k/ --port 8898`
+### Keep an Eye on Performance with Tensorboard
 
-### Citation
+To keep tabs on how your models are doing, use this command to monitor loss and retrieval performance:
+`bash
+    tensorboard --logdir ./reports/fashion200k/ --port 8898
+    `
 
-If you find this code useful in your research then please cite
+### Give Credit Where It's Due
+
+If our code has been a big help in your research, show us some love by citing it:
 
 ```
 @InProceedings{,
