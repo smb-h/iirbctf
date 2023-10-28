@@ -1,30 +1,23 @@
-# Interactive Image Retrieval Based On Content And Textual Feedback
+# Interactive Image Retrieval Enhanced by Content and Textual Feedback
 
-## Introduction
+## What's All This About?
 
-One of the peculiar features of human perception is multi-modality. We unconsciously attach attributes to objects, which can sometimes uniquely identify them.
-For instance, when a person says apple, it is quite natural that an image of an apple, which may be green or red in color, forms in their mind.
-In information retrieval, the user seeks information from a retrieval system by sending a query. Traditional information retrieval systems allow a unimodal query, i.e., either a text or an image.
+Think about how your brain effortlessly links attributes to things. When someone says "apple," your mind instantly pictures an apple, whether it's green, red, or something in between.
 
-## Teaser Figure
+Now, in the digital world, we usually search for stuff using words or images, but it's time for a twist.
 
-<img align="left" src="static/images/sample.png" width="400">
+## Sneak Peek
 
-Advanced information retrieval systems should enable the users in expressing the concept in their mind by allowing a multi-modal query.
+<img align="left" src="static/images/sample.png" width="100%">
 
-In this work, we consider such an advanced retrieval system, where users can retrieve images from a database based on a multi-modal (image-text) query.
-Specifically, the query text prompts some modification in the query image and the task is to retrieve images with the desired modifications. This task has applications in the domain of E-Commerce search, surveillance systems and internet search.
+We're shaking up the way you search. Imagine blending words and pictures to find what you're looking for. That's what our project is all about. You toss in some text, and it influences the images you get back. Perfect for hunting down products online, keeping an eye on things, or finding stuff on the web.
 
-The figure shows a potential application scenario of this task.
-In this figure a user of an E-Commerce platform is interested in buying a dress, which should look similar to her friend’s dress, but the dress should has striped design and is more covered on the neck. In this case, we would like the algorithm to retrieve some dresses with desired modifications in the query dress.
+Here's a quick example to paint the picture. Say you're shopping online and want a dress that's similar to your friend's but with some specific tweaks, like stripes and a bit more coverage. Our smart algorithm makes it happen.
 
-## ComposeAE Architecture
+## Model Magic
 
-We propose an autoencoder based model, to learn the composition of image and text query
-for retrieving images. We adopt a deep metric learning approach and learn a metric that pushes composition
-of source image and text query closer to the target images. We also used a rotational symmetry constraint
-on the optimization problem.
-![Method](static/images/model_en.png)
+We've got a nifty model, powered by autoencoders and transformers, to make sense of text and images for your search. It's all about learning from the good stuff and using it to get you the perfect matches. We even throw in a sprinkle of math to keep things in check.
+![How It Works](static/images/model_en.png)
 
 ## Results
 
