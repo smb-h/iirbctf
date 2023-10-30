@@ -26,7 +26,7 @@ import time
 from copy import deepcopy
 from datetime import datetime
 
-import data.datasets as datasets
+import iirbctf.data.datasets as datasets
 import numpy as np
 import torch
 import torch.utils.data
@@ -36,7 +36,7 @@ from torch.autograd import Variable
 from tqdm import tqdm as tqdm
 
 import iirbctf.tests.test_retrieval as test_retrieval
-import .img_text_composition_models
+from .img_text_composition_models import TIRG, ComposeAE, RealSpaceConcatAE, CAET
 
 torch.set_num_threads(3)
 
@@ -164,7 +164,7 @@ def create_model_and_optimizer(opt, texts):
     text_embed_dim = 512
 
     if opt.model == "tirg":
-        model = img_text_composition_models.TIRG(
+        model = TIRG(
             texts,
             image_embed_dim=opt.image_embed_dim,
             text_embed_dim=text_embed_dim,
@@ -172,7 +172,7 @@ def create_model_and_optimizer(opt, texts):
             name=opt.model,
         )
     elif opt.model == "composeAE":
-        model = img_text_composition_models.ComposeAE(
+        model = ComposeAE(
             texts,
             image_embed_dim=opt.image_embed_dim,
             text_embed_dim=text_embed_dim,
@@ -180,7 +180,15 @@ def create_model_and_optimizer(opt, texts):
             name=opt.model,
         )
     elif opt.model == "RealSpaceConcatAE":
-        model = img_text_composition_models.RealSpaceConcatAE(
+        model = RealSpaceConcatAE(
+            texts,
+            image_embed_dim=opt.image_embed_dim,
+            text_embed_dim=text_embed_dim,
+            use_bert=opt.use_bert,
+            name=opt.model,
+        )
+    elif opt.model == "CAET":
+        model = CAET(
             texts,
             image_embed_dim=opt.image_embed_dim,
             text_embed_dim=text_embed_dim,
@@ -391,9 +399,9 @@ def main():
     for k in opt.__dict__.keys():
         print("    ", k, ":", str(opt.__dict__[k]))
 
-    current_time = datetime.now().strftime("%b%d_%H-%M-%S")
+    current_date = datetime.now().strftime("%Y-%m-%d-%S")
     loss_weights = [1.0, 0.1, 0.1, 0.01]
-    logdir = os.path.join(opt.log_dir, current_time + "_" + socket.gethostname() + opt.comment)
+    logdir = os.path.join(opt.log_dir, current_date, opt.comment)
 
     logger = SummaryWriter(logdir)
     print("Log files saved to", logger.file_writer.get_logdir())

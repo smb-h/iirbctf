@@ -18,13 +18,13 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-import torch_functions
+from .torch_functions import NormalizationLayer, TripletLoss
 import torchvision
 from clip_client import Client as BertClient
 from torch.autograd import Variable
-from transformers import ViTFeatureExtractor, ViTModel
+from transformers import ViTImageProcessor, ViTModel
 
-import .text_model import TextLSTMModel
+from .text_model import TextLSTMModel
 
 bc = BertClient("grpc://0.0.0.0:51000")
 
@@ -205,10 +205,10 @@ class ImgTextCompositionBase(torch.nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.normalization_layer = torch_functions.NormalizationLayer(
+        self.normalization_layer = NormalizationLayer(
             normalize_scale=4.0, learn_scale=True
         )
-        self.soft_triplet_loss = torch_functions.TripletLoss()
+        self.soft_triplet_loss = TripletLoss()
 
     #         self.name = 'model_name'
 
@@ -496,13 +496,70 @@ class ComposeAE(ImgEncoderTextEncoderBase):
             torch.nn.Linear(text_embed_dim, text_embed_dim),
         )
 
-        # # Initialize the ViT feature extractor and model
-        # self.vit_feature_extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224')
-        # self.vit_model = ViTModel.from_pretrained('google/vit-base-patch16-224')
-        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # self.vit_model.to(self.device)
-        # # Initialize the dimensionality reduction layer
-        # self.dim_reduction_layer = torch.nn.Linear(768, 512).to(self.device)
+    def compose_img_text(self, imgs, text_query):
+        img_features = self.extract_img_feature(imgs)
+        text_features = self.extract_text_feature(text_query, self.use_bert)
+
+        return self.compose_img_text_features(img_features, text_features)
+
+    def compose_img_text_features(
+        self,
+        img_features,
+        text_features,
+        CONJUGATE=Variable(torch.cuda.FloatTensor(32, 1).fill_(1.0), requires_grad=False),
+    ):
+        theta_linear = self.encoderLinear((img_features, text_features, CONJUGATE))
+        theta_conv = self.encoderWithConv((img_features, text_features, CONJUGATE))
+
+        theta = theta_linear * self.a[1] + theta_conv * self.a[0]
+
+        dct_with_representations = {
+            "repres": theta,
+            "repr_to_compare_with_source": self.decoder(theta),
+            "repr_to_compare_with_mods": self.txtdecoder(theta),
+            "img_features": img_features,
+            "text_features": text_features,
+        }
+
+        return dct_with_representations
+
+
+class CAET(ImgEncoderTextEncoderBase):
+    """
+        The Compose AutoEncoder Transformer model.
+    """
+
+    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
+        super().__init__(text_query, image_embed_dim, text_embed_dim, use_bert, name)
+        self.a = torch.nn.Parameter(torch.tensor([1.0, 10.0, 1.0, 1.0]))
+        self.use_bert = use_bert
+
+        merged_dim = image_embed_dim + text_embed_dim
+
+        self.encoderLinear = torch.nn.Sequential(ComplexProjectionModule(), LinearMapping())
+        self.encoderWithConv = torch.nn.Sequential(ComplexProjectionModule(), ConvMapping())
+        self.decoder = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(image_embed_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(image_embed_dim, image_embed_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(image_embed_dim, image_embed_dim),
+        )
+        self.txtdecoder = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(image_embed_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(image_embed_dim, text_embed_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(text_embed_dim, text_embed_dim),
+        )
+
+        # Initialize the ViT feature extractor and model
+        self.vit_feature_extractor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
+        self.vit_model = ViTModel.from_pretrained('google/vit-base-patch16-224')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.vit_model.to(self.device)
+        # Initialize the dimensionality reduction layer
+        self.dim_reduction_layer = torch.nn.Linear(768, 512).to(self.device)
 
         # Create an instance of MultiheadCrossAttention
         self.cross_attention = MultiheadCrossAttention(
@@ -511,15 +568,15 @@ class ComposeAE(ImgEncoderTextEncoderBase):
             num_heads=8,
         )
 
-    # def extract_img_feature(self, imgs):
-    #     # This method assumes imgs is a list of PIL Images or paths to the images
-    #     # You may need to adjust the method to suit the format of your imgs input
-    #     inputs = self.vit_feature_extractor(images=imgs, return_tensors="pt")
-    #     inputs = {key: val.to(self.device) for key, val in inputs.items()}
-    #     outputs = self.vit_model(**inputs)
-    #     # Now outputs.pooler_output contains the feature vectors for the images, you can return it or further process it
-    #     outputs = self.dim_reduction_layer(outputs.pooler_output)
-    #     return outputs
+    def extract_img_feature(self, imgs):
+        # This method assumes imgs is a list of PIL Images or paths to the images
+        # You may need to adjust the method to suit the format of your imgs input
+        inputs = self.vit_feature_extractor(images=imgs, return_tensors="pt")
+        inputs = {key: val.to(self.device) for key, val in inputs.items()}
+        outputs = self.vit_model(**inputs)
+        # Now outputs.pooler_output contains the feature vectors for the images, you can return it or further process it
+        outputs = self.dim_reduction_layer(outputs.pooler_output)
+        return outputs
 
     def compose_img_text(self, imgs, text_query):
         img_features = self.extract_img_feature(imgs)

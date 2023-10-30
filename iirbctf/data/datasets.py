@@ -422,32 +422,32 @@ class MITStates(BaseDataset):
     def __len__(self):
         return len(self.imgs)
 
-    def get_img(self, idx, raw_img=False):
-        img_path = self.imgs[idx]["file_path"]
-        with open(img_path, "rb") as f:
-            img = PIL.Image.open(f)
-            img = img.convert("RGB")
-        if raw_img:
-            return img
-        if self.transform:
-            img = self.transform(img)
-        return img
-
     # def get_img(self, idx, raw_img=False):
-    #     img_path = self.imgs[idx]['file_path']
-    #     with open(img_path, 'rb') as f:
+    #     img_path = self.imgs[idx]["file_path"]
+    #     with open(img_path, "rb") as f:
     #         img = PIL.Image.open(f)
-    #         img = img.convert('RGB')
-
+    #         img = img.convert("RGB")
     #     if raw_img:
     #         return img
-
     #     if self.transform:
     #         img = self.transform(img)
-    #         # Convert the tensor back to a PIL Image only if return_as_tensor is False
-    #         img = transforms.ToPILImage()(img)
-
     #     return img
+
+    def get_img(self, idx, raw_img=False):
+        img_path = self.imgs[idx]['file_path']
+        with open(img_path, 'rb') as f:
+            img = PIL.Image.open(f)
+            img = img.convert('RGB')
+
+        if raw_img:
+            return img
+
+        if self.transform:
+            img = self.transform(img)
+            # Convert the tensor back to a PIL Image only if return_as_tensor is False
+            img = transforms.ToPILImage()(img)
+
+        return img
 
 
 class FashionIQ(BaseDataset):
