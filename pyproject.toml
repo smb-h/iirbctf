@@ -18,7 +18,7 @@ classifiers = [
 requires-python = "~=3.10"
 
 [tool.black]
-line-length = 99
+line-length = 79
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -26,3 +26,20 @@ exclude = '''
   | \.venv
 )/
 '''
+
+[tool.flake8]
+max-line-length = 79
+exclude = [
+    ".git",
+    "notebooks",
+    "references",
+    "models",
+    "data",
+]
+ignore = [
+    "E731",
+    "E266",
+    "E501",
+    "C901",
+    "W503",
+]

@@ -399,7 +399,7 @@ def main():
     for k in opt.__dict__.keys():
         print("    ", k, ":", str(opt.__dict__[k]))
 
-    current_date = datetime.now().strftime("%Y-%m-%d-%S")
+    current_date = datetime.now().strftime("%Y-%m-%d")
     loss_weights = [1.0, 0.1, 0.1, 0.01]
     logdir = os.path.join(opt.log_dir, current_date, opt.comment)
 
