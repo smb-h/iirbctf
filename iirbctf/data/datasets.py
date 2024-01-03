@@ -326,7 +326,7 @@ class MITStates(BaseDataset):
                 continue
 
             for file_path in listdir(path + "/images/" + f):
-                assert file_path.endswith("jpg")
+                assert file_path.endswith("png")
                 self.imgs += [
                     {
                         "file_path": path + "/images/" + f + "/" + file_path,
@@ -432,23 +432,9 @@ class MITStates(BaseDataset):
             return img
         if self.transform:
             img = self.transform(img)
+            # Convert the tensor back to a PIL Image
+            # img = transforms.ToPILImage()(img)            
         return img
-
-    # def get_img(self, idx, raw_img=False):
-    #     img_path = self.imgs[idx]['file_path']
-    #     with open(img_path, 'rb') as f:
-    #         img = PIL.Image.open(f)
-    #         img = img.convert('RGB')
-
-    #     if raw_img:
-    #         return img
-
-    #     if self.transform:
-    #         img = self.transform(img)
-    #         # Convert the tensor back to a PIL Image only if return_as_tensor is False
-    #         img = transforms.ToPILImage()(img)
-
-    #     return img
 
 
 class FashionIQ(BaseDataset):
@@ -507,14 +493,14 @@ class FashionIQ(BaseDataset):
                 else:
                     captions = " ".join(cap["captions"]).lower()
                 d = {
-                    "source_image_path": path + "all_imgs/" + cap["candidate"] + ".jpg",
+                    "source_image_path": path + "images/" + cap["candidate"] + ".png",
                     "captions": captions,
                     "original_captions": cap["captions"],
                     "candidate_image_name": cap["candidate"],
                     "source_img_id": idx,
                 }
                 if split != "real_test":
-                    d["target_image_path"] = path + "all_imgs/" + cap["target"] + ".jpg"
+                    d["target_image_path"] = path + "images/" + cap["target"] + ".png"
                     d["target_image_name"] = cap["target"]
 
                 self.imgs += [d]
@@ -556,11 +542,12 @@ class FashionIQ(BaseDataset):
 
         if self.transform:
             img = self.transform(img)
-
+            # Convert the tensor back to a PIL Image
+            img = transforms.ToPILImage()(img)
         return img
 
     def get_img_from_split(self, original_image_id):
-        img_path = self.path + "all_imgs/" + original_image_id + ".jpg"
+        img_path = self.path + "images/" + original_image_id + ".png"
 
         with open(img_path, "rb") as f:
             img = PIL.Image.open(f)

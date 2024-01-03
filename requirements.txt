@@ -45,7 +45,7 @@ googleapis-common-protos
 graphviz
 grpcio
 grpcio-health-checking
-grpcio-reflection
+# grpcio-reflection
 h11
 httptools
 huggingface-hub

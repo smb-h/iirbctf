@@ -181,10 +181,10 @@ def test(opt, model, testset):
                     imgs = [torch.from_numpy(d).float() for d in imgs]
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs).cuda()
-                # dct_with_representations = model.compose_img_text(
-                #   imgs.cuda(), mods
-                # )
-                dct_with_representations = model.compose_img_text(imgs, mods)
+                dct_with_representations = model.compose_img_text(
+                    imgs.cuda(), mods
+                )
+                # dct_with_representations = model.compose_img_text(imgs, mods)
 
                 f = dct_with_representations["repres"].data.cpu().numpy()
                 all_queries += [f]
@@ -202,10 +202,10 @@ def test(opt, model, testset):
                     imgs = [torch.from_numpy(d).float() for d in imgs]
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs).cuda()
-                # imgs = model.extract_img_feature(
-                #   imgs.cuda()
-                # ).data.cpu().numpy()
-                imgs = model.extract_img_feature(imgs).data.cpu().numpy()
+                imgs = (
+                    model.extract_img_feature(imgs.cuda()).data.cpu().numpy()
+                )
+                # imgs = model.extract_img_feature(imgs).data.cpu().numpy()
 
                 all_imgs += [imgs]
                 imgs = []
@@ -233,10 +233,10 @@ def test(opt, model, testset):
             if len(imgs) >= opt.batch_size or i == training_approx:
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs)
-                # dct_with_representations = model.compose_img_text(
-                #   imgs.cuda(), mods
-                # )
-                dct_with_representations = model.compose_img_text(imgs, mods)
+                dct_with_representations = model.compose_img_text(
+                    imgs.cuda(), mods
+                )
+                # dct_with_representations = model.compose_img_text(imgs, mods)
 
                 f = dct_with_representations["repres"].data.cpu().numpy()
                 all_queries += [f]
@@ -246,10 +246,10 @@ def test(opt, model, testset):
             if len(imgs0) >= opt.batch_size or i == training_approx:
                 imgs0 = torch.stack(imgs0).float()
                 imgs0 = torch.autograd.Variable(imgs0)
-                # imgs0 = model.extract_img_feature(
-                #   imgs0.cuda()
-                # ).data.cpu().numpy()
-                imgs0 = model.extract_img_feature(imgs0).data.cpu().numpy()
+                imgs0 = (
+                    model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
+                )
+                # imgs0 = model.extract_img_feature(imgs0).data.cpu().numpy()
 
                 all_imgs += [imgs0]
                 imgs0 = []

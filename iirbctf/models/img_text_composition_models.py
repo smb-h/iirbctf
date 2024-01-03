@@ -91,6 +91,10 @@ class MultiheadCrossAttention(torch.nn.Module):
         """
         batch_size, _ = x.size()
         x = x.view(batch_size, self.num_heads, self.head_dim)
+        
+        # Add a singleton dimension at index 1
+        x = x.unsqueeze(1)
+
         x = x.permute(0, 2, 1, 3)
         return x
 
@@ -594,10 +598,10 @@ class CAET(ImgEncoderTextEncoderBase):
         theta_conv = self.encoderWithConv((img_features, text_features, CONJUGATE))
 
         # Apply cross-attention here
-        theta_cross_attention = self.cross_attention(theta_linear, theta_conv, theta_conv)
+        # theta_cross_attention = self.cross_attention(theta_linear, theta_conv, theta_conv)
 
-        # theta = theta_linear * self.a[1] + theta_conv * self.a[0]
-        theta = theta_cross_attention * self.a[1] + theta_conv * self.a[0]
+        theta = theta_linear * self.a[1] + theta_conv * self.a[0]
+        # theta = theta_cross_attention * self.a[1] + theta_conv * self.a[0]
 
         dct_with_representations = {
             "repres": theta,
@@ -624,7 +628,8 @@ class RealLinearMapping(torch.nn.Module):
     This is linear mapping from real space to image space.
     """
 
-    def __init__(self, image_embed_dim=512, text_embed_dim=768):
+    # def __init__(self, image_embed_dim=512, text_embed_dim=768):
+    def __init__(self, image_embed_dim=512, text_embed_dim=512):
         super().__init__()
         self.mapping = torch.nn.Sequential(
             torch.nn.BatchNorm1d(text_embed_dim + image_embed_dim),
