@@ -1,4 +1,4 @@
-# Interactive Image Retrieval Enhanced by Content and Textual Feedback
+# Multimodal Query Enhancement for Image Retrieval using Transformer Networks (MQIRTN)
 
 ## What's All This About?
 
@@ -21,7 +21,7 @@ We've got a nifty model, powered by autoencoders and transformers, to make sense
 
 ## Check Out the Results
 
-Our approach is the champ here, beating the state-of-the-art method TIRG and ComposeAE on the MIT-States benchmark dataset.
+Our approach is the champ here, beating the state-of-the-art methods on the MIT-States benchmark dataset.
 
 <!-- Take a peek at some snazzy retrieval results below: -->
 <!-- ![Qual](FIQ_Retrieval.jpg) -->
@@ -30,13 +30,13 @@ Our approach is the champ here, beating the state-of-the-art method TIRG and Com
 
 -   You'll find all the packages you need in [requirements.txt](requirements.txt).
 
-## About the Code [(Inspired by ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md)
+### About the Code [(Inspired by ComposeAE)](https://github.com/ecom-research/ComposeAE/blob/master/README.md)
 
 We built our code based on ComposeAE's work, but we've spiced it up with some serious upgrades.
 
 -   `main.py`: The main event – run this script for training and testing.
 -   `datasets.py`: Gets the goods, like loading images and whipping up training retrieval queries.
--   `text_model.py`: A brainy LSTM model for text features.
+-   `text_model.py`: Model for text features.
 -   `img_text_composition_models.py`: Fancy models for mixing up images and text.
 -   `torch_function.py`: Holds our secret sauce – the soft triplet loss function and feature normalization magic.
 -   `test_retrieval.py`: This one's all about retrieval tests and calculating recall performance.
@@ -71,35 +71,35 @@ What's more, we're bringing all three categories together for a beefed-up traini
 
 To train and test your models, just use the right commands. Here are some examples to get you started:
 
--   **Training the Original TIRG Model on MITStates Dataset:**
+-   **Training the MQIRTN Model on MITStates Dataset:**
 
     ```bash
-    python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_original --log_dir ../logs/mitstates/
+    python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=MQIRTN --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_MQIRTN --log_dir ../logs/mitstates/
 
     ```
 
--   **Training TIRG with BERT on MITStates Dataset:**
+<!-- -   **Training TIRG with BERT on MITStates Dataset:**
 
     ```bash
     python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_bert --log_dir ../logs/mitstates/ --use_bert True
-    ```
+    ``` -->
 
--   **Training TIRG with Complete Text Query on MITStates Dataset:**
+<!-- -   **Training TIRG with Complete Text Query on MITStates Dataset:**
 
     ```bash
     python -W ignore main.py --dataset=mitstates --dataset_path=../data/mitstates/ --model=tirg --loss=soft_triplet --learning_rate_decay_frequency=50000 --num_iters=160000 --weight_decay=5e-5 --comment=mitstates_tirg_complete_text_query --log_dir ../logs/mitstates/ --use_complete_text_query True
-    ```
+    ``` -->
 
--   **Training the ComposeAE Model on Fashion200k Dataset:**
+-   **Training the MQIRTN Model on Fashion200k Dataset:**
 
     ```bash
-    python -W ignore main.py --dataset=fashion200k --dataset_path=../data/fashion200k/ --model=composeAE --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=fashion200k_composeAE --log_dir ../logs/fashion200k/
+    python -W ignore main.py --dataset=fashion200k --dataset_path=../data/fashion200k/ --model=MQIRTN --loss=batch_based_classification --learning_rate_decay_frequency=50000 --num_iters=160000 --use_bert True --use_complete_text_query True --weight_decay=5e-5 --comment=fashion200k_MQIRTN --log_dir ../logs/fashion200k/
     ```
 
--   **Training the RealSpaceConcatAE (ComposeAE Model with Concatenation in Real Space) on FashionIQ Dataset:**
+<!-- -   **Training the RealSpaceConcatAE (MQIRTN Model with Concatenation in Real Space) on FashionIQ Dataset:**
     ```bash
     python -W ignore main.py --dataset=fashionIQ --dataset_path=../data/fashionIQ/ --model=RealSpaceConcatAE --loss=batch_based_classification --learning_rate_decay_frequency=8000 --num_iters=100000 --use_bert True --use_complete_text_query True --comment=fashionIQ_RealSpaceConcatAE --log_dir ../logs/fashionIQ/
-    ```
+    ``` -->
 
 This version simplifies the instructions and makes it more approachable for users.
 
@@ -122,11 +122,11 @@ If our code has been a big help in your research, show us some love by citing it
 
 ```
 @InProceedings{,
-    author    = {Hosseini},
-    title     = {Interactive Image Retrieval Enhanced by Content and Textual Feedback},
+    authors    = {Seyed Mohammad Bagher Hosseini, Soodeh Bakhshandeh},
+    title     = {Multimodal Query Enhancement for Image Retrieval using Transformer Networks (MQIRTN)},
     booktitle = {},
-    month     = {October},
-    year      = {2023},
+    month     = {March},
+    year      = {2024},
     pages     = {}
 }
 ```

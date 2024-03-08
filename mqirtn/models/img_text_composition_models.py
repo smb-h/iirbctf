@@ -18,13 +18,14 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from .torch_functions import NormalizationLayer, TripletLoss
 import torchvision
 from clip_client import Client as BertClient
 from torch.autograd import Variable
-from transformers import ViTImageProcessor, ViTModel
+from transformers import (ViTConfig, ViTFeatureExtractor, ViTImageProcessor,
+                          ViTModel)
 
 from .text_model import TextLSTMModel
+from .torch_functions import NormalizationLayer, TripletLoss
 
 bc = BertClient("grpc://0.0.0.0:51000")
 
@@ -47,7 +48,9 @@ class SelfAttentionModule(torch.nn.Module):
 
     def forward(self, theta):
         query = self.fc_query(theta)
-        attn_scores = torch.matmul(query, query.transpose(-1, -2)) / self.sqrt_dk
+        attn_scores = (
+            torch.matmul(query, query.transpose(-1, -2)) / self.sqrt_dk
+        )
         attn_weights = F.softmax(attn_scores, dim=-1)
         attn_output = torch.matmul(attn_weights, theta)
 
@@ -59,7 +62,9 @@ class SelfAttentionModule(torch.nn.Module):
 
 
 class MultiheadCrossAttention(torch.nn.Module):
-    def __init__(self, query_feature_size=512, key_value_feature_size=512, num_heads=8):
+    def __init__(
+        self, query_feature_size=512, key_value_feature_size=512, num_heads=8
+    ):
         super(MultiheadCrossAttention, self).__init__()
         assert (
             query_feature_size % num_heads == 0
@@ -75,8 +80,12 @@ class MultiheadCrossAttention(torch.nn.Module):
 
         # Linear transformations for queries, keys, and values for each head
         self.W_q = torch.nn.Linear(query_feature_size, query_feature_size)
-        self.W_k = torch.nn.Linear(key_value_feature_size, key_value_feature_size)
-        self.W_v = torch.nn.Linear(key_value_feature_size, key_value_feature_size)
+        self.W_k = torch.nn.Linear(
+            key_value_feature_size, key_value_feature_size
+        )
+        self.W_v = torch.nn.Linear(
+            key_value_feature_size, key_value_feature_size
+        )
 
         # Linear transformation for the concatenated outputs of all heads
         self.W_o = torch.nn.Linear(query_feature_size, query_feature_size)
@@ -91,7 +100,7 @@ class MultiheadCrossAttention(torch.nn.Module):
         """
         batch_size, _ = x.size()
         x = x.view(batch_size, self.num_heads, self.head_dim)
-        
+
         # Add a singleton dimension at index 1
         x = x.unsqueeze(1)
 
@@ -121,7 +130,9 @@ class MultiheadCrossAttention(torch.nn.Module):
         values = self.split_heads(values)
 
         # Scaled dot-product attention
-        attn_scores = torch.matmul(queries, keys.permute(0, 1, 3, 2)) / (self.head_dim**0.5)
+        attn_scores = torch.matmul(queries, keys.permute(0, 1, 3, 2)) / (
+            self.head_dim**0.5
+        )
         attn_weights = F.softmax(attn_scores, dim=-1)
         attn_output = torch.matmul(attn_weights, values)
 
@@ -189,7 +200,9 @@ class MultiheadSelfAttention(torch.nn.Module):
         values = self.split_heads(values)
 
         # Scaled dot-product attention
-        attn_scores = torch.matmul(queries, keys.permute(0, 1, 3, 2)) / (self.head_dim**0.5)
+        attn_scores = torch.matmul(queries, keys.permute(0, 1, 3, 2)) / (
+            self.head_dim**0.5
+        )
         attn_weights = F.softmax(attn_scores, dim=-1)
         attn_output = torch.matmul(attn_weights, values)
 
@@ -225,43 +238,59 @@ class ImgTextCompositionBase(torch.nn.Module):
     def compose_img_text(self, imgs, text_query):
         raise NotImplementedError
 
-    def compute_loss(self, imgs_query, text_query, imgs_target, soft_triplet_loss=True):
-        dct_with_representations = self.compose_img_text(imgs_query, text_query)
-        composed_source_image = self.normalization_layer(dct_with_representations["repres"])
+    def compute_loss(
+        self, imgs_query, text_query, imgs_target, soft_triplet_loss=True
+    ):
+        dct_with_representations = self.compose_img_text(
+            imgs_query, text_query
+        )
+        composed_source_image = self.normalization_layer(
+            dct_with_representations["repres"]
+        )
         target_img_features_non_norm = self.extract_img_feature(imgs_target)
-        target_img_features = self.normalization_layer(target_img_features_non_norm)
+        target_img_features = self.normalization_layer(
+            target_img_features_non_norm
+        )
         assert (
             composed_source_image.shape[0] == target_img_features.shape[0]
             and composed_source_image.shape[1] == target_img_features.shape[1]
         )
         # Get Rot_Sym_Loss
         if self.name == "composeAE":
-            CONJUGATE = Variable(torch.cuda.FloatTensor(32, 1).fill_(-1.0), requires_grad=False)
+            CONJUGATE = Variable(
+                torch.cuda.FloatTensor(32, 1).fill_(-1.0), requires_grad=False
+            )
             conjugate_representations = self.compose_img_text_features(
                 target_img_features_non_norm,
                 dct_with_representations["text_features"],
                 CONJUGATE,
             )
-            composed_target_image = self.normalization_layer(conjugate_representations["repres"])
+            composed_target_image = self.normalization_layer(
+                conjugate_representations["repres"]
+            )
             source_img_features = self.normalization_layer(
                 dct_with_representations["img_features"]
             )  # img1
             if soft_triplet_loss:
-                dct_with_representations["rot_sym_loss"] = self.compute_soft_triplet_loss_(
-                    composed_target_image, source_img_features
+                dct_with_representations["rot_sym_loss"] = (
+                    self.compute_soft_triplet_loss_(
+                        composed_target_image, source_img_features
+                    )
                 )
             else:
-                dct_with_representations[
-                    "rot_sym_loss"
-                ] = self.compute_batch_based_classification_loss_(
-                    composed_target_image, source_img_features
+                dct_with_representations["rot_sym_loss"] = (
+                    self.compute_batch_based_classification_loss_(
+                        composed_target_image, source_img_features
+                    )
                 )
         else:  # tirg, RealSpaceConcatAE etc
             dct_with_representations["rot_sym_loss"] = 0
 
         if soft_triplet_loss:
             return (
-                self.compute_soft_triplet_loss_(composed_source_image, target_img_features),
+                self.compute_soft_triplet_loss_(
+                    composed_source_image, target_img_features
+                ),
                 dct_with_representations,
             )
         else:
@@ -297,7 +326,9 @@ class ImgTextCompositionBase(torch.nn.Module):
 class ImgEncoderTextEncoderBase(ImgTextCompositionBase):
     """Base class for image and text encoder."""
 
-    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
+    def __init__(
+        self, text_query, image_embed_dim, text_embed_dim, use_bert, name
+    ):
         super().__init__()
         # img model
         img_model = torchvision.models.resnet18(pretrained=True)
@@ -308,7 +339,9 @@ class ImgEncoderTextEncoderBase(ImgTextCompositionBase):
                 return F.adaptive_avg_pool2d(x, (1, 1))
 
         img_model.avgpool = GlobalAvgPool2d()
-        img_model.fc = torch.nn.Sequential(torch.nn.Linear(image_embed_dim, image_embed_dim))
+        img_model.fc = torch.nn.Sequential(
+            torch.nn.Linear(image_embed_dim, image_embed_dim)
+        )
         self.img_model = img_model
 
         # text model
@@ -337,8 +370,12 @@ class TIRG(ImgEncoderTextEncoderBase):
     CVPR 2019. arXiv:1812.07119
     """
 
-    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
-        super().__init__(text_query, image_embed_dim, text_embed_dim, use_bert, name)
+    def __init__(
+        self, text_query, image_embed_dim, text_embed_dim, use_bert, name
+    ):
+        super().__init__(
+            text_query, image_embed_dim, text_embed_dim, use_bert, name
+        )
 
         self.a = torch.nn.Parameter(torch.tensor([1.0, 10.0, 1.0, 1.0]))
         self.use_bert = use_bert
@@ -476,15 +513,23 @@ class ComposeAE(ImgEncoderTextEncoderBase):
     arXiv:2006.11149
     """
 
-    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
-        super().__init__(text_query, image_embed_dim, text_embed_dim, use_bert, name)
+    def __init__(
+        self, text_query, image_embed_dim, text_embed_dim, use_bert, name
+    ):
+        super().__init__(
+            text_query, image_embed_dim, text_embed_dim, use_bert, name
+        )
         self.a = torch.nn.Parameter(torch.tensor([1.0, 10.0, 1.0, 1.0]))
         self.use_bert = use_bert
 
         # merged_dim = image_embed_dim + text_embed_dim
 
-        self.encoderLinear = torch.nn.Sequential(ComplexProjectionModule(), LinearMapping())
-        self.encoderWithConv = torch.nn.Sequential(ComplexProjectionModule(), ConvMapping())
+        self.encoderLinear = torch.nn.Sequential(
+            ComplexProjectionModule(), LinearMapping()
+        )
+        self.encoderWithConv = torch.nn.Sequential(
+            ComplexProjectionModule(), ConvMapping()
+        )
         self.decoder = torch.nn.Sequential(
             torch.nn.BatchNorm1d(image_embed_dim),
             torch.nn.ReLU(),
@@ -510,10 +555,16 @@ class ComposeAE(ImgEncoderTextEncoderBase):
         self,
         img_features,
         text_features,
-        CONJUGATE=Variable(torch.cuda.FloatTensor(32, 1).fill_(1.0), requires_grad=False),
+        CONJUGATE=Variable(
+            torch.cuda.FloatTensor(32, 1).fill_(1.0), requires_grad=False
+        ),
     ):
-        theta_linear = self.encoderLinear((img_features, text_features, CONJUGATE))
-        theta_conv = self.encoderWithConv((img_features, text_features, CONJUGATE))
+        theta_linear = self.encoderLinear(
+            (img_features, text_features, CONJUGATE)
+        )
+        theta_conv = self.encoderWithConv(
+            (img_features, text_features, CONJUGATE)
+        )
 
         theta = theta_linear * self.a[1] + theta_conv * self.a[0]
 
@@ -528,20 +579,28 @@ class ComposeAE(ImgEncoderTextEncoderBase):
         return dct_with_representations
 
 
-class CAET(ImgEncoderTextEncoderBase):
+class MQIRTN(ImgEncoderTextEncoderBase):
     """
-        The Compose AutoEncoder Transformer model.
+    The Compose AutoEncoder Transformer model.
     """
 
-    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
-        super().__init__(text_query, image_embed_dim, text_embed_dim, use_bert, name)
+    def __init__(
+        self, text_query, image_embed_dim, text_embed_dim, use_bert, name
+    ):
+        super().__init__(
+            text_query, image_embed_dim, text_embed_dim, use_bert, name
+        )
         self.a = torch.nn.Parameter(torch.tensor([1.0, 10.0, 1.0, 1.0]))
         self.use_bert = use_bert
 
         merged_dim = image_embed_dim + text_embed_dim
 
-        self.encoderLinear = torch.nn.Sequential(ComplexProjectionModule(), LinearMapping())
-        self.encoderWithConv = torch.nn.Sequential(ComplexProjectionModule(), ConvMapping())
+        self.encoderLinear = torch.nn.Sequential(
+            ComplexProjectionModule(), LinearMapping()
+        )
+        self.encoderWithConv = torch.nn.Sequential(
+            ComplexProjectionModule(), ConvMapping()
+        )
         self.decoder = torch.nn.Sequential(
             torch.nn.BatchNorm1d(image_embed_dim),
             torch.nn.ReLU(),
@@ -557,13 +616,21 @@ class CAET(ImgEncoderTextEncoderBase):
             torch.nn.Linear(text_embed_dim, text_embed_dim),
         )
 
-        # Initialize the ViT feature extractor and model
-        self.vit_feature_extractor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
-        self.vit_model = ViTModel.from_pretrained('google/vit-base-patch16-224')
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.vit_model.to(self.device)
-        # Initialize the dimensionality reduction layer
-        self.dim_reduction_layer = torch.nn.Linear(768, 512).to(self.device)
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+        # Initializing a ViT vit-base-patch16-224 style configuration
+        self.vit_feature_extractor = ViTFeatureExtractor().from_pretrained(
+            "google/vit-base-patch16-224"
+        )
+        # Projection head
+        self.projection_head = torch.nn.Sequential(
+            # FashionIQ ViT flatten dims
+            torch.nn.Linear(150528, image_embed_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(image_embed_dim, image_embed_dim),
+        )
+        # self.projection_head.to(self.device)
 
         # Create an instance of MultiheadCrossAttention
         self.cross_attention = MultiheadCrossAttention(
@@ -573,14 +640,15 @@ class CAET(ImgEncoderTextEncoderBase):
         )
 
     def extract_img_feature(self, imgs):
-        # This method assumes imgs is a list of PIL Images or paths to the images
-        # You may need to adjust the method to suit the format of your imgs input
-        inputs = self.vit_feature_extractor(images=imgs, return_tensors="pt")
-        inputs = {key: val.to(self.device) for key, val in inputs.items()}
-        outputs = self.vit_model(**inputs)
-        # Now outputs.pooler_output contains the feature vectors for the images, you can return it or further process it
-        outputs = self.dim_reduction_layer(outputs.pooler_output)
-        return outputs
+        # imgs = imgs.to(self.device)
+        features = self.vit_feature_extractor(images=imgs, return_tensors="pt")
+        features = features["pixel_values"]
+        # Reshape features
+        features = features.view(features.size(0), -1)
+        features = features.to(self.device)
+        # Project features to the desired dimension
+        projected_features = self.projection_head(features)
+        return projected_features
 
     def compose_img_text(self, imgs, text_query):
         img_features = self.extract_img_feature(imgs)
@@ -592,10 +660,16 @@ class CAET(ImgEncoderTextEncoderBase):
         self,
         img_features,
         text_features,
-        CONJUGATE=Variable(torch.cuda.FloatTensor(32, 1).fill_(1.0), requires_grad=False),
+        CONJUGATE=Variable(
+            torch.cuda.FloatTensor(32, 1).fill_(1.0), requires_grad=False
+        ),
     ):
-        theta_linear = self.encoderLinear((img_features, text_features, CONJUGATE))
-        theta_conv = self.encoderWithConv((img_features, text_features, CONJUGATE))
+        theta_linear = self.encoderLinear(
+            (img_features, text_features, CONJUGATE)
+        )
+        theta_conv = self.encoderWithConv(
+            (img_features, text_features, CONJUGATE)
+        )
 
         # Apply cross-attention here
         # theta_cross_attention = self.cross_attention(theta_linear, theta_conv, theta_conv)
@@ -679,15 +753,23 @@ class RealSpaceConcatAE(ImgEncoderTextEncoderBase):
     arXiv:2006.11149
     """
 
-    def __init__(self, text_query, image_embed_dim, text_embed_dim, use_bert, name):
-        super().__init__(text_query, image_embed_dim, text_embed_dim, use_bert, name)
+    def __init__(
+        self, text_query, image_embed_dim, text_embed_dim, use_bert, name
+    ):
+        super().__init__(
+            text_query, image_embed_dim, text_embed_dim, use_bert, name
+        )
         self.a = torch.nn.Parameter(torch.tensor([1.0, 10.0, 1.0, 1.0]))
         self.use_bert = use_bert
 
         # merged_dim = image_embed_dim + text_embed_dim
 
-        self.encoderLinear = torch.nn.Sequential(RealConCatModule(), RealLinearMapping())
-        self.encoderWithConv = torch.nn.Sequential(RealConCatModule(), RealConvMapping())
+        self.encoderLinear = torch.nn.Sequential(
+            RealConCatModule(), RealLinearMapping()
+        )
+        self.encoderWithConv = torch.nn.Sequential(
+            RealConCatModule(), RealConvMapping()
+        )
         self.decoder = torch.nn.Sequential(
             torch.nn.BatchNorm1d(image_embed_dim),
             torch.nn.ReLU(),

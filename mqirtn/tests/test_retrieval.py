@@ -18,6 +18,7 @@ from collections import OrderedDict
 
 import numpy as np
 import torch
+# from torchvision import transforms
 from tqdm import tqdm as tqdm
 
 
@@ -32,11 +33,13 @@ def fiq_test(opt, model, testset):
     imgs = []
     mods = []
     out = []
+    # img_transform = transforms.ToTensor()
 
     for i in tqdm(range(len(testset))):
         torch.cuda.empty_cache()
         item = testset[i]
         imgs += [testset.get_img(item["source_img_id"])]
+        # imgs += [img_transform(testset.get_img(item["source_img_id"]))]
 
         all_target_captions += [item["target_caption"]]
         all_target_ids += [item["target_image_name"]]
@@ -44,11 +47,13 @@ def fiq_test(opt, model, testset):
         mods += [item["target_caption"]]
 
         if len(imgs) >= opt.batch_size or i == len(testset) - 1:
-            imgs = torch.stack(imgs).float()
-            imgs = torch.autograd.Variable(imgs).cuda()
+            # imgs = torch.stack(imgs).float()
+            # imgs = torch.autograd.Variable(imgs).cuda()
 
             dct_with_representations = model.compose_img_text(
-                imgs.cuda(), mods
+                # imgs.cuda(), mods
+                imgs,
+                mods,
             )
             f = dct_with_representations["repres"].data.cpu().numpy()
             all_queries += [f]
@@ -63,13 +68,11 @@ def fiq_test(opt, model, testset):
     imgs = []
     for i, original_image_id in enumerate(tqdm(testset.all_imgs_from_cat)):
         imgs += [testset.get_img_from_split(original_image_id)]
-        if (
-            len(imgs) >= opt.batch_size
-            or i == len(testset.all_imgs_from_cat) - 1
-        ):
-            imgs = torch.stack(imgs).float()
-            imgs = torch.autograd.Variable(imgs).cuda()
-            imgs = model.extract_img_feature(imgs.cuda()).data.cpu().numpy()
+        if len(imgs) >= opt.batch_size or i == len(testset.all_imgs_from_cat) - 1:
+            # imgs = torch.stack(imgs).float()
+            # imgs = torch.autograd.Variable(imgs).cuda()
+            # imgs = model.extract_img_feature(imgs.cuda()).data.cpu().numpy()
+            imgs = model.extract_img_feature(imgs).data.cpu().numpy()
 
             all_imgs += [imgs]
             imgs = []
@@ -91,15 +94,11 @@ def fiq_test(opt, model, testset):
     nn_result = [
         np.argsort(-sims[i, :])[:150] for i in range(sims.shape[0])
     ]  # take more to remove duplicates
-    nn_result_ids = [
-        [testset.all_imgs_from_cat[nn] for nn in nns] for nns in nn_result
-    ]
+    nn_result_ids = [[testset.all_imgs_from_cat[nn] for nn in nns] for nns in nn_result]
 
     filtered_ids = []
     for ranking_ids in nn_result_ids:
-        filtered_id_50 = list(OrderedDict.fromkeys(ranking_ids))[
-            :50
-        ]  # filter duplicates and preserve order
+        filtered_id_50 = list(OrderedDict.fromkeys(ranking_ids))[:50]  # filter duplicates and preserve order
         filtered_ids.append(filtered_id_50)
 
     if opt.category_to_train == "all":
@@ -114,14 +113,10 @@ def fiq_test(opt, model, testset):
         for i, target_caption in enumerate(all_target_captions):
             clothing = target_caption.split()[0]
             if clothing in things:
-                things[clothing].append(
-                    {"orig_index": i, "target_caption": target_caption}
-                )
+                things[clothing].append({"orig_index": i, "target_caption": target_caption})
             else:
                 things[clothing] = []
-                things[clothing].append(
-                    {"orig_index": i, "target_caption": target_caption}
-                )
+                things[clothing].append({"orig_index": i, "target_caption": target_caption})
 
         cats_recalls["dress"]["num"] = len(things["dress"])
         cats_recalls["shirt"]["num"] = len(things["shirt"])
@@ -134,9 +129,7 @@ def fiq_test(opt, model, testset):
         for i, nns in enumerate(filtered_ids):
             if all_target_ids[i] in nns[:k]:
                 if opt.category_to_train == "all":
-                    cats_recalls[all_target_captions[i].split()[0]][
-                        "recall"
-                    ] += 1
+                    cats_recalls[all_target_captions[i].split()[0]]["recall"] += 1
                 else:
                     cats_recalls[opt.category_to_train]["recall"] += 1
         for cat in cats_recalls:
@@ -181,9 +174,7 @@ def test(opt, model, testset):
                     imgs = [torch.from_numpy(d).float() for d in imgs]
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs).cuda()
-                dct_with_representations = model.compose_img_text(
-                    imgs.cuda(), mods
-                )
+                dct_with_representations = model.compose_img_text(imgs.cuda(), mods)
                 # dct_with_representations = model.compose_img_text(imgs, mods)
 
                 f = dct_with_representations["repres"].data.cpu().numpy()
@@ -202,9 +193,7 @@ def test(opt, model, testset):
                     imgs = [torch.from_numpy(d).float() for d in imgs]
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs).cuda()
-                imgs = (
-                    model.extract_img_feature(imgs.cuda()).data.cpu().numpy()
-                )
+                imgs = model.extract_img_feature(imgs.cuda()).data.cpu().numpy()
                 # imgs = model.extract_img_feature(imgs).data.cpu().numpy()
 
                 all_imgs += [imgs]
@@ -233,9 +222,7 @@ def test(opt, model, testset):
             if len(imgs) >= opt.batch_size or i == training_approx:
                 imgs = torch.stack(imgs).float()
                 imgs = torch.autograd.Variable(imgs)
-                dct_with_representations = model.compose_img_text(
-                    imgs.cuda(), mods
-                )
+                dct_with_representations = model.compose_img_text(imgs.cuda(), mods)
                 # dct_with_representations = model.compose_img_text(imgs, mods)
 
                 f = dct_with_representations["repres"].data.cpu().numpy()
@@ -246,9 +233,7 @@ def test(opt, model, testset):
             if len(imgs0) >= opt.batch_size or i == training_approx:
                 imgs0 = torch.stack(imgs0).float()
                 imgs0 = torch.autograd.Variable(imgs0)
-                imgs0 = (
-                    model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
-                )
+                imgs0 = model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
                 # imgs0 = model.extract_img_feature(imgs0).data.cpu().numpy()
 
                 all_imgs += [imgs0]
@@ -285,18 +270,14 @@ def test(opt, model, testset):
         if opt.dataset == "mitstates":
             r = 0.0
             for i, nns in enumerate(nn_result):
-                if all_target_captions[i].split()[0] in [
-                    c.split()[0] for c in nns[:k]
-                ]:
+                if all_target_captions[i].split()[0] in [c.split()[0] for c in nns[:k]]:
                     r += 1
             r /= len(nn_result)
             out += [("recall_top" + str(k) + "_correct_adj", r)]
 
             r = 0.0
             for i, nns in enumerate(nn_result):
-                if all_target_captions[i].split()[1] in [
-                    c.split()[1] for c in nns[:k]
-                ]:
+                if all_target_captions[i].split()[1] in [c.split()[1] for c in nns[:k]]:
                     r += 1
             r /= len(nn_result)
             out += [("recall_top" + str(k) + "_correct_noun", r)]

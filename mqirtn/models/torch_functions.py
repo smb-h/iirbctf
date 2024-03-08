@@ -59,7 +59,9 @@ class MyTripletLossFuncFunction(torch.autograd.Function):
         correct_count = 0.0
         for i, j, k in triplets:
             w = 1.0
-            loss += w * torch.log(1 + torch.exp(distances[i, j] - distances[i, k]))
+            loss += w * torch.log(
+                1 + torch.exp(distances[i, j] - distances[i, k])
+            )
             if distances[i, j] < distances[i, k]:
                 correct_count += 1
 
@@ -76,11 +78,21 @@ class MyTripletLossFuncFunction(torch.autograd.Function):
 
         for i, j, k in ctx.triplets:
             w = 1.0
-            f = 1.0 - 1.0 / (1.0 + torch.exp(distances[i, j] - distances[i, k]))
-            grad_features[i] += w * f * (features[i] - features[j]) / ctx.triplet_count
-            grad_features[j] += w * f * (features[j] - features[i]) / ctx.triplet_count
-            grad_features[i] += -w * f * (features[i] - features[k]) / ctx.triplet_count
-            grad_features[k] += -w * f * (features[k] - features[i]) / ctx.triplet_count
+            f = 1.0 - 1.0 / (
+                1.0 + torch.exp(distances[i, j] - distances[i, k])
+            )
+            grad_features[i] += (
+                w * f * (features[i] - features[j]) / ctx.triplet_count
+            )
+            grad_features[j] += (
+                w * f * (features[j] - features[i]) / ctx.triplet_count
+            )
+            grad_features[i] += (
+                -w * f * (features[i] - features[k]) / ctx.triplet_count
+            )
+            grad_features[k] += (
+                -w * f * (features[k] - features[i]) / ctx.triplet_count
+            )
 
         grad_features *= grad_output.squeeze()
         return (
@@ -113,5 +125,7 @@ class NormalizationLayer(torch.nn.Module):
             self.norm_s = torch.nn.Parameter(torch.FloatTensor((self.norm_s,)))
 
     def forward(self, x):
-        features = self.norm_s * x / torch.norm(x, dim=1, keepdim=True).expand_as(x)
+        features = (
+            self.norm_s * x / torch.norm(x, dim=1, keepdim=True).expand_as(x)
+        )
         return features

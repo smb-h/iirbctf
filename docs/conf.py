@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# iirbctf documentation build configuration file, created by
+# mqirtn documentation build configuration file, created by
 # sphinx-quickstart.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -41,7 +41,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "iirbctf"
+project = "mqirtn"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,7 +164,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "iirbctfdoc"
+htmlhelp_basename = "mqirtndoc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -181,7 +181,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "iirbctf.tex", "iirbctf", " Documentation", "SMB H", "manual"),
+    ("index", "mqirtn.tex", "mqirtn", " Documentation", "SMB H", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -209,7 +209,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "iirbctf", "iirbctf" + " Documentation", ["iirbctf"], 1)]
+man_pages = [("index", "mqirtn", "mqirtn" + " Documentation", ["mqirtn"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -223,10 +223,10 @@ man_pages = [("index", "iirbctf", "iirbctf" + " Documentation", ["iirbctf"], 1)]
 texinfo_documents = [
     (
         "index",
-        "iirbctf",
-        "iirbctf" + " Documentation",
+        "mqirtn",
+        "mqirtn" + " Documentation",
         "SMB H",
-        "iirbctf",
+        "mqirtn",
         "Interactive Image Retrieval Based On Content And Textual Feedback",
         "Miscellaneous",
     ),

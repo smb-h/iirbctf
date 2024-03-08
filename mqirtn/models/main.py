@@ -26,7 +26,6 @@ import time
 from copy import deepcopy
 from datetime import datetime
 
-import iirbctf.data.datasets as datasets
 import numpy as np
 import torch
 import torch.utils.data
@@ -35,8 +34,11 @@ from tensorboardX import SummaryWriter
 from torch.autograd import Variable
 from tqdm import tqdm as tqdm
 
-import iirbctf.tests.test_retrieval as test_retrieval
-from .img_text_composition_models import TIRG, ComposeAE, RealSpaceConcatAE, CAET
+import mqirtn.data.datasets as datasets
+import mqirtn.tests.test_retrieval as test_retrieval
+
+from .img_text_composition_models import (MQIRTN, TIRG, ComposeAE,
+                                          RealSpaceConcatAE)
 
 torch.set_num_threads(3)
 
@@ -53,7 +55,9 @@ def parse_opt():
     parser.add_argument("--use_bert", type=bool, default=False)
     parser.add_argument("--use_complete_text_query", type=bool, default=False)
     parser.add_argument("--learning_rate", type=float, default=1e-2)
-    parser.add_argument("--learning_rate_decay_frequency", type=int, default=9999999)
+    parser.add_argument(
+        "--learning_rate_decay_frequency", type=int, default=9999999
+    )
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--weight_decay", type=float, default=1e-6)
     parser.add_argument("--category_to_train", type=str, default="all")
@@ -80,7 +84,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -92,7 +98,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -105,7 +113,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -117,7 +127,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -131,7 +143,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -144,7 +158,9 @@ def load_dataset(opt):
                     torchvision.transforms.Resize(224),
                     torchvision.transforms.CenterCrop(224),
                     torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                    torchvision.transforms.Normalize(
+                        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                    ),
                 ]
             ),
         )
@@ -187,8 +203,8 @@ def create_model_and_optimizer(opt, texts):
             use_bert=opt.use_bert,
             name=opt.model,
         )
-    elif opt.model == "CAET":
-        model = CAET(
+    elif opt.model == "MQIRTN":
+        model = MQIRTN(
             texts,
             image_embed_dim=opt.image_embed_dim,
             text_embed_dim=text_embed_dim,
@@ -216,10 +232,15 @@ def create_model_and_optimizer(opt, texts):
                 for p11 in p1["params"]:
                     for j, p22 in enumerate(p2["params"]):
                         if p11 is p22:
-                            p2["params"][j] = torch.tensor(0.0, requires_grad=True)
+                            p2["params"][j] = torch.tensor(
+                                0.0, requires_grad=True
+                            )
 
     optimizer = torch.optim.SGD(
-        params, lr=opt.learning_rate, momentum=0.9, weight_decay=opt.weight_decay
+        params,
+        lr=opt.learning_rate,
+        momentum=0.9,
+        weight_decay=opt.weight_decay,
     )
 
     return model, optimizer
@@ -268,7 +289,8 @@ def train_loop(opt, loss_weights, logger, trainset, testset, model, optimizer):
                 else:
                     t = test_retrieval.test(opt, model, dataset)
                 tests += [
-                    (name + " " + metric_name, metric_value) for metric_name, metric_value in t
+                    (name + " " + metric_name, metric_value)
+                    for metric_name, metric_value in t
                 ]
             for metric_name, metric_value in tests:
                 logger.add_scalar(metric_name, metric_value, it)
@@ -308,7 +330,9 @@ def train_loop(opt, loss_weights, logger, trainset, testset, model, optimizer):
                     supp_text = [str(d["noun"]) for d in data]
                     mods = [str(d["mod"]["str"]) for d in data]
                     # text_query here means complete_text_query
-                    text_query = [adj + " " + noun for adj, noun in zip(mods, supp_text)]
+                    text_query = [
+                        adj + " " + noun for adj, noun in zip(mods, supp_text)
+                    ]
                 else:
                     text_query = [str(d["target_caption"]) for d in data]
             else:
@@ -338,7 +362,9 @@ def train_loop(opt, loss_weights, logger, trainset, testset, model, optimizer):
                 )
 
                 losses += [("L2_loss", loss_weights[1], dec_img_loss.cuda())]
-                losses += [("L2_loss_text", loss_weights[2], dec_text_loss.cuda())]
+                losses += [
+                    ("L2_loss_text", loss_weights[2], dec_text_loss.cuda())
+                ]
                 losses += [
                     (
                         "rot_sym_loss",
@@ -357,10 +383,15 @@ def train_loop(opt, loss_weights, logger, trainset, testset, model, optimizer):
                 )
 
                 losses += [("L2_loss", loss_weights[1], dec_img_loss.cuda())]
-                losses += [("L2_loss_text", loss_weights[2], dec_text_loss.cuda())]
+                losses += [
+                    ("L2_loss_text", loss_weights[2], dec_text_loss.cuda())
+                ]
 
             total_loss = sum(
-                [loss_weight * loss_value for loss_name, loss_weight, loss_value in losses]
+                [
+                    loss_weight * loss_value
+                    for loss_name, loss_weight, loss_value in losses
+                ]
             )
             assert not torch.isnan(total_loss)
             losses += [("total training loss", None, total_loss.item())]
@@ -409,7 +440,9 @@ def main():
         logger.add_text(k, str(opt.__dict__[k]))
 
     trainset, testset = load_dataset(opt)
-    model, optimizer = create_model_and_optimizer(opt, [t for t in trainset.get_all_texts()])
+    model, optimizer = create_model_and_optimizer(
+        opt, [t for t in trainset.get_all_texts()]
+    )
 
     # # log model graph
     # sample_data = testset[0]
@@ -448,7 +481,10 @@ def main():
                 t = test_retrieval.fiq_test(opt, model, dataset)
             else:
                 t = test_retrieval.test(opt, model, dataset)
-            tests += [(name + " " + metric_name, metric_value) for metric_name, metric_value in t]
+            tests += [
+                (name + " " + metric_name, metric_value)
+                for metric_name, metric_value in t
+            ]
         for metric_name, metric_value in tests:
             logger.add_scalar(metric_name, metric_value, it)
             print("    ", metric_name, round(metric_value, 4))

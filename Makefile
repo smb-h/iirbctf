@@ -3,7 +3,7 @@
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-PROJECT_NAME = iirbctf
+PROJECT_NAME = mqirtn
 PYTHON_VERSION = 3.10
 PYTHON_INTERPRETER = python
 
@@ -30,14 +30,14 @@ clean:
 ## Lint using flake8 and black (use `make format` to do formatting)
 .PHONY: lint
 lint:
-	flake8 iirbctf
-	black --check --config pyproject.toml iirbctf
+	flake8 mqirtn
+	black --check --config pyproject.toml mqirtn
 
 
 ## Format source code with black
 .PHONY: format
 format:
-	black --config pyproject.toml iirbctf
+	black --config pyproject.toml mqirtn
 
 
 
@@ -58,7 +58,7 @@ create_environment:
 ## Make Dataset
 .PHONY: data
 data: requirements
-	$(PYTHON_INTERPRETER) iirbctf/data/make_dataset.py
+	$(PYTHON_INTERPRETER) mqirtn/data/make_dataset.py
 
 #################################################################################
 # Self Documenting Commands                                                     #

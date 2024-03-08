@@ -31,7 +31,11 @@ class SimpleVocab(object):
     def tokenize_text(self, text):
         text = text.encode("ascii", "ignore").decode("ascii")
         tokens = (
-            str(text).lower().translate(str.maketrans("", "", string.punctuation)).strip().split()
+            str(text)
+            .lower()
+            .translate(str.maketrans("", "", string.punctuation))
+            .strip()
+            .split()
         )
         return tokens
 
@@ -58,7 +62,9 @@ class SimpleVocab(object):
 
 
 class TextLSTMModel(torch.nn.Module):
-    def __init__(self, texts_to_build_vocab, word_embed_dim=512, lstm_hidden_dim=512):
+    def __init__(
+        self, texts_to_build_vocab, word_embed_dim=512, lstm_hidden_dim=512
+    ):
         super(TextLSTMModel, self).__init__()
 
         self.vocab = SimpleVocab()
